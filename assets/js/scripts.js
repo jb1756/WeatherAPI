@@ -28,8 +28,8 @@ function fetchCurrentWeather(apiURL, cityName) {
 
                 localStorage.setItem(cityName, latLonPair);
 
-                var oneCallApiURL = "https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&exclude=minutely,hourly&units=imperial&appid=" + apiKey;
-
+                var oneCallApiURL = "https://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&exclude=minutely,hourly&units=imperial&appid=" + apiKey;
+                console.log(oneCallApiURL)
                 fetchOneCallWeather(oneCallApiURL);
             })
         } else {
@@ -38,6 +38,7 @@ function fetchCurrentWeather(apiURL, cityName) {
     })
 }
 
+//throwing an error 401 regarding key. unsure why...
 function fetchOneCallWeather(apiURL) {
     fetch(apiURL)
         .then(function (newResponse) {
@@ -57,7 +58,7 @@ function fetchOneCallWeather(apiURL) {
 
 // This function gets the info for a city already in the list. It does not need to check whether the city exists as it was already checked when the city was first searched for.
 function getListCity(coordinates) {
-    apiURL = "https://api.openweathermap.org/data/2.5/onecall?lat=" + coordinates[0] + "&lon=" + coordinates[1] + "&exclude=minutely,hourly&units=imperial&appid=" + apiKey;
+    apiURL = "https://api.openweathermap.org/data/2.5/weather?lat=" + coordinates[0] + "&lon=" + coordinates[1] + "&exclude=minutely,hourly&units=imperial&appid=" + apiKey;
 
     fetch(apiURL).then(function (response) {
         if (response.ok) {
@@ -70,34 +71,22 @@ function getListCity(coordinates) {
 
 function getCurrentWeather(data) {
     $(".results-panel").addClass("visible");
-
-    $("#currentIcon")[0].src = "http://openweathermap.org/img/wn/" + data.current.weather[0].icon + "@2x.png";
-    $("#temperature")[0].textContent = "Temperature: " + data.current.temp.toFixed(1) + " \u2109";
-    $("#humidity")[0].textContent = "Humidity: " + data.current.humidity + "% ";
-    $("#wind-speed")[0].textContent = "Wind Speed: " + data.current.wind_speed.toFixed(1) + " MPH";
-    $("#uv-index")[0].textContent = "  " + data.current.uvi;
-
-    if (data.current.uvi < 3) {
-        $("#uv-index").removeClass("moderate severe");
-        $("#uv-index").addClass("favorable");
-    } else if (data.current.uvi < 6) {
-        $("#uv-index").removeClass("favorable severe");
-        $("#uv-index").addClass("moderate");
-    } else {
-        $("#uv-index").removeClass("favorable moderate");
-        $("#uv-index").addClass("severe");
-    }
-
+    console.log(data)
+    $("#currentIcon")[0].src = "http://openweathermap.org/img/wn/" + data.weather[0].icon + "@2x.png";
+    $("#temperature")[0].textContent = "Temperature: " + data.temp + " \u2109";
+    $("#humidity")[0].textContent = "Humidity: " + data.humidity + "% ";
+    $("#wind-speed")[0].textContent = "Wind Speed: " + data.wind_speed + " MPH";
+   
     getFutureWeather(data);
 }
 
 function getFutureWeather(data) {
     for (var i = 0; i < 5; i++) {
         var futureWeather = {
-            date: convertUnixTime(data, i),
-            icon: "http://openweathermap.org/img/wn/" + data.daily[i + 1].weather[0].icon + "@2x.png",
-            temp: data.daily[i + 1].temp.day.toFixed(1),
-            humidity: data.daily[i + 1].humidity
+            //date: convertUnixTime(data, i),
+            //icon: "http://openweathermap.org/img/wn/" + data.weather[0].icon + "@2x.png",
+            temp: data.main.temp,
+            humidity: data.main.humidity
         }
 
         var currentSelector = "#day-" + i;
@@ -123,11 +112,11 @@ function titleCase(city) {
 }
 
 // This converts the UNIX time that is received from the server.
-function convertUnixTime(data, index) {
-    const dateObject = new Date(data.daily[index + 1].dt * 1000);
+//function convertUnixTime(data, index) {
+//    const dateObject = new Date(data.daily.dt * 1000);
 
-    return (dateObject.toLocaleDateString());
-}
+ //   return (dateObject.toLocaleDateString());
+//}
 
 $("#search-button").on("click", function (e) {
     e.preventDefault();
